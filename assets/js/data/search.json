@@ -1,0 +1,28 @@
+---
+layout: none
+---
+{%- assign content_pages = site.pages | where_exp: "p", "p.path contains 'content/'" -%}
+{%- assign entries = site.posts | concat: content_pages -%}
+[
+{%- for entry in entries -%}
+  {%- assign title = entry.title | default: site.title -%}
+  {%- assign text = entry.content | strip_html | normalize_whitespace -%}
+  {%- assign search = title | append: " " | append: text
+      | replace: "&amp;", "&" | replace: "&lt;", "<" | replace: "&gt;", ">"
+      | replace: "&quot;", '"' | replace: "&#39;", "'" | replace: "&nbsp;", " " -%}
+  {%- assign plain = search | downcase
+      | replace: "ä", "a" | replace: "ö", "o" | replace: "ü", "u"
+      | replace: "à", "a" | replace: "â", "a" | replace: "é", "e" | replace: "è", "e"
+      | replace: "ê", "e" | replace: "ë", "e" | replace: "ï", "i" | replace: "î", "i"
+      | replace: "ô", "o" | replace: "ç", "c" | replace: "ñ", "n" -%}
+  {
+    "title": {{ title | jsonify }},
+    "url": {{ entry.url | relative_url | jsonify }},
+    "categories": {{ entry.categories | join: ", " | jsonify }},
+    "tags": {{ entry.tags | join: ", " | jsonify }},
+    "content": {{ text | truncate: 200 | jsonify }},
+    "search": {{ search | jsonify }},
+    "search_plain": {{ plain | jsonify }}
+  }{% unless forloop.last %},{% endunless %}
+{%- endfor -%}
+]
